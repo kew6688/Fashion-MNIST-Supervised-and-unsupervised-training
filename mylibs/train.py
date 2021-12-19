@@ -26,4 +26,4 @@ def train(train_loader, net, loss_function, optimizer, USE_GPU):
 
         loss += main_loss.item()
     
-    return loss
+    return loss / len(train_loader.dataset)

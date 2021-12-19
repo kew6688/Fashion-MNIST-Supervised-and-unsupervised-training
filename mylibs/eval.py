@@ -21,4 +21,4 @@ def validate(val_loader, net, loss, USE_GPU):
             preds = net.forward(inputs)
             val_loss += loss(preds, labels)
     
-    return val_loss
+    return val_loss / len(val_loader.dataset)
