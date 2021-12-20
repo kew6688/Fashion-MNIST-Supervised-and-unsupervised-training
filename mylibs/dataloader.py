@@ -55,14 +55,22 @@ class CustomFashionMNIST(Dataset):
             plt.axis('off')
         plt.show()
         
-def getTrainLoaders(include_labels=range(10), transform=None, batch_size=64, num_workers=1, mode=7, USE_GPU=False):
-    train_set = CustomFashionMNIST(train=True, include_labels=include_labels, transform=transform, mode=mode,USE_GPU=USE_GPU)
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    return train_loader
+def getTrainValidateLoaders(include_labels=range(10), transform=None, batch_size=64, split = 0.9, num_workers=1, mode=7, USE_GPU=False):
+    dataset = CustomFashionMNIST(train=True, include_labels=include_labels, transform=transform, mode=mode,USE_GPU=USE_GPU)
 
-def getValidateLoaders(include_labels=range(10), transform=None, batch_size=64, num_workers=1, mode=7, USE_GPU=False):
-    # return labeled, unlabeled, full validation dataloader
-    return None, None, None
+    # split train & validation sets
+    train_set_size = int(len(dataset) * split)
+    validation_set_size = len(dataset) - train_set_size
+    train_set, validation_set = torch.utils.data.random_split(dataset, [train_set_size, validation_set_size])
+
+    labeled_validation_set = [(img,label) for img, label in validation_set if label in include_labels]
+    unlabeled_validation_set = [(img,label) for img, label in validation_set if label not in include_labels]
+
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    validation_loader = DataLoader(validation_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    labeled_validation_loader = DataLoader(labeled_validation_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    unlabeled_validation_loader = DataLoader(unlabeled_validation_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    return train_loader, labeled_validation_loader, unlabeled_validation_loader, validation_loader
 
 def getDataLoaders(include_labels=range(10), transform=None, batch_size=64, num_workers=1, mode=7, USE_GPU=False):
     # create test set for labelled and unlabelled
