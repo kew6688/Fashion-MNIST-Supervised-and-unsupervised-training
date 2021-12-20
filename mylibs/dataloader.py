@@ -55,20 +55,29 @@ class CustomFashionMNIST(Dataset):
             plt.axis('off')
         plt.show()
         
+def getTrainLoaders(include_labels=range(10), transform=None, batch_size=64, num_workers=1, mode=7, USE_GPU=False):
+    train_set = CustomFashionMNIST(train=True, include_labels=include_labels, transform=transform, mode=mode,USE_GPU=USE_GPU)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    return train_loader
+
+def getValidateLoaders(include_labels=range(10), transform=None, batch_size=64, num_workers=1, mode=7, USE_GPU=False):
+    # return labeled, unlabeled, full validation dataloader
+    return None, None, None
+
 def getDataLoaders(include_labels=range(10), transform=None, batch_size=64, num_workers=1, mode=7, USE_GPU=False):
-    # add validation set?
     # create test set for labelled and unlabelled
     train_set = CustomFashionMNIST(train=True, include_labels=include_labels, transform=transform, mode=mode,USE_GPU=USE_GPU)
     test_set = CustomFashionMNIST(train=False, include_labels=include_labels, transform=transform, mode=7,USE_GPU=USE_GPU)
-    train_dataloader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    test_dataloader = DataLoader(test_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    return train_dataloader, test_dataloader
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    return train_loader, test_loader
 
 # create test set for labelled and unlabelled
-def getTestLoaders(include_labels=range(10), transform=None, batch_size=64, num_workers=1, mode=7, USE_GPU=False):
+def getTestLoaders(include_labels=range(10), transform=None, batch_size=64, num_workers=1, USE_GPU=False):
     test_set = CustomFashionMNIST(train=False, include_labels=range(10), transform=transform, mode=7,USE_GPU=USE_GPU)
-    labelled_set = [(img,label) for img, label in test_set if label in include_labels]
-    unlabelled_set = [(img,label) for img, label in test_set if label not in include_labels]
-    labelled_dataloader = DataLoader(labelled_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    unlabelled_dataloader = DataLoader(unlabelled_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    return labelled_dataloader, unlabelled_dataloader
+    labeled_set = [(img,label) for img, label in test_set if label in include_labels]
+    unlabeled_set = [(img,label) for img, label in test_set if label not in include_labels]
+    labeled_test_loader = DataLoader(labeled_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    unlabeled_test_loader = DataLoader(unlabeled_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    return labeled_test_loader, unlabeled_test_loader, test_loader
