@@ -63,22 +63,9 @@ def getTrainValidateLoaders(include_labels=range(10), transform=None, batch_size
     validation_set_size = len(dataset) - train_set_size
     train_set, validation_set = torch.utils.data.random_split(dataset, [train_set_size, validation_set_size])
 
-    labeled_validation_set = [(img,label) for img, label in validation_set if label in include_labels]
-    unlabeled_validation_set = [(img,label) for img, label in validation_set if label not in include_labels]
-
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     validation_loader = DataLoader(validation_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    labeled_validation_loader = DataLoader(labeled_validation_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    unlabeled_validation_loader = DataLoader(unlabeled_validation_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    return train_loader, labeled_validation_loader, unlabeled_validation_loader, validation_loader
-
-def getDataLoaders(include_labels=range(10), transform=None, batch_size=64, num_workers=1, mode=7, USE_GPU=False):
-    # create test set for labelled and unlabelled
-    train_set = CustomFashionMNIST(train=True, include_labels=include_labels, transform=transform, mode=mode,USE_GPU=USE_GPU)
-    test_set = CustomFashionMNIST(train=False, include_labels=include_labels, transform=transform, mode=7,USE_GPU=USE_GPU)
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    return train_loader, test_loader
+    return train_loader, validation_loader
 
 # create test set for labelled and unlabelled
 def getTestLoaders(include_labels=range(10), transform=None, batch_size=64, num_workers=1, USE_GPU=False):

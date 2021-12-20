@@ -2,16 +2,20 @@ import torch
 import numpy as np
 from torch._C import dtype
 from sklearn.metrics import f1_score
+from mylibs.eval import validate
 
-def train(train_loader, net, loss_function, optimizer, USE_GPU):
+def train(train_val_loaders, net, loss_function, optimizer, USE_GPU, checkpoint_path):
     
     loss = 0
     correct = 0
     preds = []
     gt_labels = []
+
+    train_loader, val_loader = train_val_loaders
     
     for i, data in enumerate(train_loader):
-    
+
+        net.train()
         inputs, labels = data
 
         if USE_GPU:
@@ -36,15 +40,22 @@ def train(train_loader, net, loss_function, optimizer, USE_GPU):
 
         loss += main_loss.item()
 
-    gt_labels = torch.tensor(gt_labels)
-    preds = torch.tensor(preds)
-
-    eval_metrics = {"acc": correct / len(train_loader.dataset),
-                    "loss": loss / len(train_loader),
-                    "f1": f1_score(gt_labels, preds, average='weighted'),
+    # validate
+    val_metrics = validate(val_loader, net, loss_function, USE_GPU)
+    train_metrics = {"acc": correct / len(train_loader.dataset),
+                     "loss": loss / len(train_loader),
+                     "f1": f1_score(torch.tensor(gt_labels), torch.tensor(preds), average='weighted'),
                     }
-    
-    return eval_metrics
+    metrics = {"train": train_metrics, 
+               "val": val_metrics,
+               }
+    # save checkpoint for future reference
+    torch.save({'model_state_dict': net.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'metrics': metrics
+                }, 
+                checkpoint_path)
+    return metrics
 
 
 def autoencoder_train(train_loader, net, loss_function, optimizer, USE_GPU):
@@ -69,6 +80,6 @@ def autoencoder_train(train_loader, net, loss_function, optimizer, USE_GPU):
 
         loss += main_loss.item()
 
-    eval_metrics = {"loss": loss / len(train_loader.dataset)}
+    eval_metrics = {"loss": loss / len(train_loader)}
     
     return eval_metrics

@@ -31,10 +31,9 @@ def validate(val_loader, net, loss, USE_GPU):
             gt_labels.extend(labels)
             # --- eval metrics ---
 
-    preds = torch.tensor(preds)
-    gt_labels = torch.tensor(gt_labels)
     eval_metrics = {"acc": correct / len(val_loader.dataset), 
                     "loss": val_loss / len(val_loader),
-                    "f1": f1_score(gt_labels, preds, average='weighted')}
+                    "f1": f1_score(torch.tensor(gt_labels), torch.tensor(preds), average='weighted'),
+                    }
     
     return eval_metrics
