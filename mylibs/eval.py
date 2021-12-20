@@ -22,11 +22,11 @@ def validate(val_loader, net, loss, USE_GPU):
             else: 
                 pass
             
-            outputs = net.forward(inputs)
+            outputs = net(inputs)
             val_loss += loss(outputs, labels)
             # --- eval metrics ---
             pred_label = outputs.argmax(dim=1)
-            correct += (pred_label == labels).sum()
+            correct += (pred_label == labels).sum().item()
             preds.extend(pred_label)
             gt_labels.extend(labels)
             # --- eval metrics ---
@@ -34,7 +34,7 @@ def validate(val_loader, net, loss, USE_GPU):
     preds = torch.tensor(preds)
     gt_labels = torch.tensor(gt_labels)
     eval_metrics = {"acc": correct / len(val_loader.dataset), 
-                    "loss": val_loss / len(val_loader),
+                    "loss": val_loss / len(val_loader.dataset),
                     "f1": f1_score(gt_labels, preds, average='weighted')}
     
     return eval_metrics

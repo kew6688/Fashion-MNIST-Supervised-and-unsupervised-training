@@ -26,7 +26,7 @@ def train(train_loader, net, loss_function, optimizer, USE_GPU):
         outputs = net(inputs)
         # --- eval metrics ---
         pred_label = outputs.argmax(dim=1)
-        correct += (pred_label == labels).sum()
+        correct += (pred_label == labels).sum().item()
         preds.extend(pred_label)
         gt_labels.extend(labels)
         # --- eval metrics ---
@@ -40,7 +40,7 @@ def train(train_loader, net, loss_function, optimizer, USE_GPU):
     preds = torch.tensor(preds)
 
     eval_metrics = {"acc": correct / len(train_loader.dataset),
-                    "loss": loss / len(train_loader),
+                    "loss": loss / len(train_loader.dataset),
                     "f1": f1_score(gt_labels, preds, average='weighted'),
                     }
     
