@@ -1,10 +1,14 @@
 import torch
 import numpy as np
 from torch._C import dtype
+from sklearn.metrics import f1_score
 
 def train(train_loader, net, loss_function, optimizer, USE_GPU):
     
     loss = 0
+    correct = 0
+    preds = []
+    gt_labels = []
     
     for i, data in enumerate(train_loader):
     
@@ -20,10 +24,24 @@ def train(train_loader, net, loss_function, optimizer, USE_GPU):
         
         optimizer.zero_grad()
         outputs = net(inputs)
+        # --- eval metrics ---
+        pred_label = outputs.argmax(dim=1)
+        correct += (pred_label == labels).sum()
+        preds.extend(pred_label)
+        gt_labels.extend(labels)
+        # --- eval metrics ---
         main_loss = loss_function(outputs, labels)
         main_loss.backward()
         optimizer.step()
 
         loss += main_loss.item()
+
+    gt_labels = torch.tensor(gt_labels)
+    preds = torch.tensor(preds)
+
+    eval_metrics = {"acc": correct / len(train_loader.dataset),
+                    "loss": loss / len(train_loader.dataset),
+                    "f1": f1_score(gt_labels, preds, average='weighted'),
+                    }
     
-    return loss / len(train_loader.dataset)
+    return eval_metrics

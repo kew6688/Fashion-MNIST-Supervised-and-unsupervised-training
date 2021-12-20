@@ -1,9 +1,13 @@
 import torch
 import numpy as np
+from sklearn.metrics import f1_score
 
 def validate(val_loader, net, loss, USE_GPU):
     
     val_loss = 0
+    correct = 0
+    preds = []
+    gt_labels = []
     
     with torch.no_grad():
         for i, data in enumerate(val_loader):
@@ -18,7 +22,19 @@ def validate(val_loader, net, loss, USE_GPU):
             else: 
                 pass
             
-            preds = net.forward(inputs)
-            val_loss += loss(preds, labels)
+            outputs = net.forward(inputs)
+            val_loss += loss(outputs, labels)
+            # --- eval metrics ---
+            pred_label = outputs.argmax(dim=1)
+            correct += (pred_label == labels).sum()
+            preds.extend(pred_label)
+            gt_labels.extend(labels)
+            # --- eval metrics ---
+
+    preds = torch.tensor(preds)
+    gt_labels = torch.tensor(gt_labels)
+    eval_metrics = {"acc": correct / len(val_loader.dataset), 
+                    "loss": val_loss / len(val_loader.dataset),
+                    "f1": f1_score(gt_labels, preds, average='weighted')}
     
-    return val_loss / len(val_loader.dataset)
+    return eval_metrics

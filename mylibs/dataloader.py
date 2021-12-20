@@ -49,10 +49,10 @@ class CustomFashionMNIST(Dataset):
             plt.axis('off')
         plt.show()
 
-def getDataLoaders(include_labels=range(9), transform=None, train_batch_size=64, test_batch_size=1, num_workers=1, mode=2):
+def getDataLoaders(include_labels=range(9), transform=None, batch_size=64, num_workers=1, mode=2):
     # add validation set?
     train_set = CustomFashionMNIST(train=True, include_labels=include_labels, transform=transform, mode=mode)
     test_set = CustomFashionMNIST(train=False, include_labels=include_labels, transform=transform, mode=2)
-    train_dataloader = DataLoader(train_set, batch_size=train_batch_size, shuffle=True, num_workers=num_workers)
-    test_dataloader = DataLoader(test_set, batch_size=test_batch_size, shuffle=True, num_workers=num_workers)
+    train_dataloader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    test_dataloader = DataLoader(test_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     return train_dataloader, test_dataloader
