@@ -48,7 +48,6 @@ def label_data(unlabeled_data, num_classes, mode=0, USE_GPU=False):
     elif mode == 2 or mode == 5:
         # Auto Encoder to reduce dimensions of images
         images = encode(images, USE_GPU)
-        print(images)
 
     if mode == 0 or mode == 1 or mode == 2:
         # kmeans clustering the images
