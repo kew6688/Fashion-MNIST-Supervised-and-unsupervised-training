@@ -33,9 +33,9 @@ def encode(images, USE_GPU=False):
 # 3 - Gaussian Mixture
 # 4 - Gaussian Mixture with PCA
 # 5 - Gaussian Mixture with Auto Encoder
-def label_data(unlabeled_data, num_classes, mode=0, USE_GPU=False):
+def label_data(unlabeled_data, labels, mode=0, USE_GPU=False):
     print("Labeling unlabeled data...")
-    offset = 10 - num_classes
+    num_classes = len(labels)
     images = np.array([x[0].numpy() for x in unlabeled_data])
     actual_labels = np.array([x[1] for x in unlabeled_data])
 
@@ -56,14 +56,14 @@ def label_data(unlabeled_data, num_classes, mode=0, USE_GPU=False):
         # Gaussian Mixture clustering the images
         model = GaussianMixture(n_components=num_classes, covariance_type='spherical')
 
-    predict_labels = model.fit_predict(images) + offset
+    predict_labels = model.fit_predict(images)
 
     # relabel to match the original labels to be consistent with test dataset
     rearrange_labels = np.copy(predict_labels)
-    cmatrix = confusion_matrix(predict_labels, actual_labels)
+    cmatrix = confusion_matrix(predict_labels, actual_labels, labels=labels)
     for i in range(num_classes):
-        mask = predict_labels == i + offset
-        rearrange_labels[mask] = np.argmax(cmatrix[i]) + offset
+        mask = predict_labels == i
+        rearrange_labels[mask] = labels[np.argmax(cmatrix[i])]
 
     accuracy = np.sum(rearrange_labels == actual_labels) / len(actual_labels)
     print("Labeling accuracy: {}".format(accuracy))
