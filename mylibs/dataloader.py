@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import random
 from mylibs.clustering import label_data
+import numpy as np
 
 class CustomFashionMNIST(Dataset):
     # mode:
@@ -20,11 +21,12 @@ class CustomFashionMNIST(Dataset):
     # 7 - use full FasionMNIST data
     def __init__(self, train, include_labels, transform, mode=0, USE_GPU=False):
         super(Dataset, self).__init__()
+        exclude_labels = np.arange(10)[~np.isin(np.arange(10), include_labels)]
         raw_data = torchvision.datasets.FashionMNIST(root='../data/', download=True, train=train, transform=transform)
         self.labeled_data = [(img, label) for img, label in raw_data if label in include_labels]
         self.unlabeled_data = [(img, label) for img, label in raw_data if label not in include_labels]
         if mode <= 5:
-            self.unlabeled_data = label_data(self.unlabeled_data, num_classes=10-len(include_labels), mode=mode, USE_GPU=USE_GPU)
+            self.unlabeled_data = label_data(self.unlabeled_data, labels=exclude_labels, mode=mode, USE_GPU=USE_GPU)
             self.labeled_data.extend(self.unlabeled_data)
             self.data = self.labeled_data
         elif mode == 6:

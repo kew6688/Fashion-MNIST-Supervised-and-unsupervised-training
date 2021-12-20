@@ -56,15 +56,18 @@ def label_data(unlabeled_data, labels, mode=0, USE_GPU=False):
         # Gaussian Mixture clustering the images
         model = GaussianMixture(n_components=num_classes, covariance_type='spherical')
 
-    predict_labels = model.fit_predict(images)
+    predict_labels = labels[model.fit_predict(images)]
 
     # relabel to match the original labels to be consistent with test dataset
     rearrange_labels = np.copy(predict_labels)
     cmatrix = confusion_matrix(predict_labels, actual_labels, labels=labels)
     for i in range(num_classes):
-        mask = predict_labels == i
+        mask = predict_labels == labels[i]
         rearrange_labels[mask] = labels[np.argmax(cmatrix[i])]
 
     accuracy = np.sum(rearrange_labels == actual_labels) / len(actual_labels)
     print("Labeling accuracy: {}".format(accuracy))
+    
+    for i in range(len(unlabeled_data)):
+        unlabeled_data[i] = (unlabeled_data[i][0], rearrange_labels[i])
     return unlabeled_data
