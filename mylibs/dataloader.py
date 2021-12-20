@@ -20,7 +20,7 @@ class CustomFashionMNIST(Dataset):
         if mode == 0:
             self.data = self.labeled_data
         elif mode == 1:
-            self.unlabeled_data = label_data(self.unlabeled_data, num_classes=10-len(include_labels))
+            self.unlabeled_data = label_data(self.unlabeled_data, num_classes=10-len(include_labels), mode=2)
             self.labeled_data.extend(self.unlabeled_data)
             self.data = self.labeled_data
         else:

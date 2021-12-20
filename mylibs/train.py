@@ -45,3 +45,30 @@ def train(train_loader, net, loss_function, optimizer, USE_GPU):
                     }
     
     return eval_metrics
+
+
+def autoencoder_train(train_loader, net, loss_function, optimizer, USE_GPU):
+    
+    loss = 0
+    
+    for i, inputs in enumerate(train_loader):
+
+        if USE_GPU:
+            inputs = inputs.cuda()
+            net = net.cuda()
+            
+        else: 
+            pass
+        
+        optimizer.zero_grad()
+        outputs = net(inputs)
+        # --- eval metrics ---
+        main_loss = loss_function(outputs, inputs)
+        main_loss.backward()
+        optimizer.step()
+
+        loss += main_loss.item()
+
+    eval_metrics = {"loss": loss / len(train_loader.dataset)}
+    
+    return eval_metrics

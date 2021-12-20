@@ -1,20 +1,63 @@
 from sklearn.cluster import KMeans
+from sklearn.mixture import GaussianMixture
 from sklearn.decomposition import PCA
 import numpy as np
 from sklearn.metrics import confusion_matrix
+import torch
+from torch.utils.data.dataloader import DataLoader
 
-def label_data(unlabeled_data, num_classes):
+from mylibs.loss import autoencoder_loss
+from mylibs.train import autoencoder_train
+from mylibs.model import Autoencoder
+
+EPOCH = 30
+
+def encode(images, USE_GPU=False):
+    print("Training Auto Encoder...")
+    device = torch.device("cuda" if USE_GPU else "cpu")
+    model = Autoencoder().to(device)
+    optimizer = torch.optim.Adadelta(model.parameters(), lr=0.01)
+    train_dataloader = DataLoader(images, batch_size=32, shuffle=True, num_workers=4)
+    for epoch in range(1, EPOCH+1):
+        loss = autoencoder_train(train_dataloader, model, autoencoder_loss, optimizer, USE_GPU)
+        print("Epoch: {} Loss: {}".format(epoch, loss))
+
+    encode_dataloader = DataLoader(images, batch_size=1, shuffle=True, num_workers=4)
+    return model.encode(encode_dataloader)
+    
+
+# mode:
+# 0 - kmeans
+# 1 - kmeans with PCA
+# 2 - kmeans with Auto Encoder
+# 3 - Gaussian Mixture
+# 4 - Gaussian Mixture with PCA
+# 5 - Gaussian Mixture with Auto Encoder
+def label_data(unlabeled_data, num_classes, mode=0, USE_GPU=False):
     print("Labeling unlabeled data...")
     offset = 10 - num_classes
     images = np.array([x[0].numpy() for x in unlabeled_data])
     actual_labels = np.array([x[1] for x in unlabeled_data])
-    # pca_2 = PCA(n_components=2)
-    # pca_2_result = pca_2.fit_transform(images)
-    # print(pca_2_result.shape)
 
-    # kmeans clustering the images
-    kmeans = KMeans(n_clusters=num_classes).fit(images.reshape(images.shape[0], -1))
-    predict_labels = kmeans.labels_ + offset
+    if mode == 0 or mode == 3:
+        images = images.reshape(len(unlabeled_data), -1)
+    elif mode == 1 or mode == 4:
+        # PCA to reduce dimensions of images
+        pca = PCA(n_components=5)
+        images = pca.fit_transform(images.reshape(len(unlabeled_data), -1))
+    elif mode == 2 or mode == 5:
+        # Auto Encoder to reduce dimensions of images
+        images = encode(images, USE_GPU)
+        print(images)
+
+    if mode == 0 or mode == 1 or mode == 2:
+        # kmeans clustering the images
+        model = KMeans(n_clusters=num_classes)
+    elif mode == 3 or mode == 4 or mode == 5:
+        # Gaussian Mixture clustering the images
+        model = GaussianMixture(n_components=num_classes, covariance_type='spherical')
+
+    predict_labels = model.fit_predict(images) + offset
 
     # relabel to match the original labels to be consistent with test dataset
     rearrange_labels = np.copy(predict_labels)
@@ -22,7 +65,7 @@ def label_data(unlabeled_data, num_classes):
     for i in range(num_classes):
         mask = predict_labels == i + offset
         rearrange_labels[mask] = np.argmax(cmatrix[i]) + offset
-        
+
     accuracy = np.sum(rearrange_labels == actual_labels) / len(actual_labels)
     print("Labeling accuracy: {}".format(accuracy))
     return unlabeled_data
