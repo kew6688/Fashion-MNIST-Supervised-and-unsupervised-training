@@ -18,13 +18,13 @@ class CustomFashionMNIST(Dataset):
         self.labeled_data = [(img, label) for img, label in raw_data if label in include_labels]
         self.unlabeled_data = [(img, label) for img, label in raw_data if label not in include_labels]
         if mode == 0:
-            self.labeled_data.extend(self.unlabeled_data)
             self.data = self.labeled_data
         elif mode == 1:
             self.unlabeled_data = label_data(self.unlabeled_data, num_classes=10-len(include_labels))
             self.labeled_data.extend(self.unlabeled_data)
             self.data = self.labeled_data
         else:
+            self.labeled_data.extend(self.unlabeled_data)
             self.data = self.labeled_data
         
         random.shuffle(self.data)

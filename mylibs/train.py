@@ -40,7 +40,7 @@ def train(train_loader, net, loss_function, optimizer, USE_GPU):
     preds = torch.tensor(preds)
 
     eval_metrics = {"acc": correct / len(train_loader.dataset),
-                    "loss": loss / len(train_loader.dataset),
+                    "loss": loss / len(train_loader),
                     "f1": f1_score(gt_labels, preds, average='weighted'),
                     }
     
