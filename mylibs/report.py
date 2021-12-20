@@ -40,4 +40,38 @@ def report_epoch_summary(eval_metrics):
 	plt.show()
 
 def report_summary(mode_metrics, mode_description):
-	pass
+	plt.clf()
+	plt.figure(684, figsize=(16,8))
+
+	mode_acc = [(mode, [x["val"]["acc"] for x in metric]) for mode, metric in mode_metrics.items()]
+	mode_loss = [(mode, [x["val"]["loss"] for x in metric]) for mode, metric in mode_metrics.items()]
+	mode_f1 = [(mode, [x["val"]["f1"] for x in metric]) for mode, metric in mode_metrics.items()]
+
+	plt.subplot(131)
+	for mode, vals in mode_loss:
+		epochs = len(vals)
+		plt.plot(range(1, epochs+1), vals, marker = 'o', label = mode_description[mode])
+	plt.legend()
+	plt.title("Validation Loss vs Epochs")
+	plt.xlabel("epochs")
+	plt.ylabel("Loss")
+
+	plt.subplot(132)
+	for mode, vals in mode_acc:
+		epochs = len(vals)
+		plt.plot(range(1, epochs+1), vals, marker = 'o', label = mode_description[mode])
+	plt.legend()
+	plt.title("Validation Accuracy vs Epochs")
+	plt.xlabel("epochs")
+	plt.ylabel("Accuracy")
+
+	plt.subplot(133)
+	for mode, vals in mode_f1:
+		epochs = len(vals)
+		plt.plot(range(1, epochs+1), vals, marker = 'o', label = mode_description[mode])
+	plt.legend()
+	plt.title("Validation F1 vs Epochs")
+	plt.xlabel("epochs")
+	plt.ylabel("F1 Score")
+
+	plt.show()
