@@ -10,7 +10,7 @@ from mylibs.loss import autoencoder_loss
 from mylibs.train import autoencoder_train
 from mylibs.model import Autoencoder
 
-EPOCH = 1
+EPOCH = 15
 
 def encode(images, USE_GPU=False):
     print("Training Auto Encoder...")
