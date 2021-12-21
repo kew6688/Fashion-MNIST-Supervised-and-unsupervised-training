@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 loss_function = nn.CrossEntropyLoss()
 
 def log_normal_pdf(sample, mean, logvar, raxis=1):
-    log2pi = torch.log(torch.tensor(2.0 * torch.pi))
+    log2pi = torch.log(torch.tensor(2.0 * torch.as_tensor(np.pi)))
     return torch.sum(-0.5 * ((sample - mean) ** 2.0 * torch.exp(torch.tensor(-logvar)) + logvar + log2pi), dim=raxis)
 
 
