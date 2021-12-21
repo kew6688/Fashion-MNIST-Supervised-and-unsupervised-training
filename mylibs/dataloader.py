@@ -26,7 +26,7 @@ class CustomFashionMNIST(Dataset):
         self.labeled_data = [(img, label) for img, label in raw_data if label in include_labels]
         self.unlabeled_data = [(img, label) for img, label in raw_data if label not in include_labels]
         if mode <= 5:
-            self.unlabeled_data = label_data(self.unlabeled_data, labels=exclude_labels, mode=mode, USE_GPU=USE_GPU)
+            self.unlabeled_data = label_data(self.unlabeled_data, labels=exclude_labels, all_data=raw_data, mode=mode, USE_GPU=USE_GPU)
             self.labeled_data.extend(self.unlabeled_data)
             self.data = self.labeled_data
         elif mode == 6:

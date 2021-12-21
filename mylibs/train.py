@@ -65,11 +65,11 @@ def autoencoder_train(train_loader, net, loss_function, optimizer, USE_GPU):
     for i, inputs in enumerate(train_loader):
 
         if USE_GPU:
-            inputs = inputs.cuda()
+            inputs = inputs[0].cuda()
             net = net.cuda()
             
         else: 
-            pass
+            inputs = inputs[0]
         
         optimizer.zero_grad()
         outputs = net(inputs)
