@@ -76,7 +76,6 @@ def report_summary(mode_metrics, mode_description):
 
 	plt.show()
 
-import matplotlib.pyplot as plt
 def report_test_summary(mode_metrics, mode_description):
 	plt.clf()
 	plt.figure(485, figsize=(16,8))
