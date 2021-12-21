@@ -23,7 +23,7 @@ def encode(images, USE_GPU=False):
         print("Epoch: {} Loss: {}".format(epoch, loss))
 
     encode_dataloader = DataLoader(images, batch_size=1, shuffle=True, num_workers=4)
-    return model.encode(encode_dataloader)
+    return model.encode(encode_dataloader, USE_GPU)
     
 
 # mode:

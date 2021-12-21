@@ -58,8 +58,7 @@ class Autoencoder(nn.Module):
         # encoder
         self.encoder = nn.Sequential(
             nn.Conv2d(1, 32, 3, padding='same'),
-            nn.BatchNorm2d(32),
-            nn.Conv2d(32, 32, 3, padding='same'),
+            nn.ReLU(),
             nn.MaxPool2d(2),
             nn.BatchNorm2d(32),
             nn.Conv2d(32, 1, 2, padding='same'),
@@ -78,8 +77,6 @@ class Autoencoder(nn.Module):
             nn.ReLU(),
             nn.BatchNorm2d(32),
             nn.UpsamplingBilinear2d(scale_factor=2),
-            nn.Conv2d(32, 32, 2, padding='same'),
-            nn.ReLU(),
             nn.BatchNorm2d(32),
             nn.Conv2d(32, 1, 3, padding='same'),
             nn.ReLU()
@@ -90,5 +87,12 @@ class Autoencoder(nn.Module):
         x = self.decoder(x)
         return x
 
-    def encode(self, images):
-        return np.array([self.encoder(x).detach().numpy()[0] for x in images])
+    def encode(self, images, USE_GPU):
+        res = []
+        for i, image in enumerate(images):
+
+            if USE_GPU:
+                image = image.cuda()
+            e = self.encoder(image).detach().cpu().numpy()[0]
+            res.append(e)
+        return np.array(res)
