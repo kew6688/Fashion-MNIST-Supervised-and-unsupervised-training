@@ -23,7 +23,7 @@ def validate(val_loader, net, loss, USE_GPU):
                 pass
             
             outputs = net(inputs)
-            val_loss += loss(outputs, labels)
+            val_loss += loss(outputs, labels).item()
             # --- eval metrics ---
             pred_label = outputs.argmax(dim=1)
             correct += (pred_label == labels).sum().item()
