@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.functional as F
 import torchvision.models as models
 import numpy as np
+from pl_bolts.models.autoencoders import VAE
 
 class Reshape(nn.Module):
     def __init__(self, *args):
@@ -52,40 +53,11 @@ class CustomFashionResNet(nn.Module):
         output = self.output_layer(output.squeeze())
         return output
 
-class Autoencoder(nn.Module):
-    def __init__(self):
-        super(Autoencoder, self).__init__()
-        # encoder
-        self.encoder = nn.Sequential(
-            nn.Conv2d(1, 32, 3, padding='same'),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.BatchNorm2d(32),
-            nn.Conv2d(32, 1, 2, padding='same'),
-            nn.ReLU(),
-            nn.Flatten(),
-            nn.Linear(196, 5),
-            nn.ReLU()
-        )
-
-        # decoder
-        self.decoder = nn.Sequential(
-            nn.Linear(5, 196),
-            nn.ReLU(),
-            nn.Unflatten(1, (1, 14, 14)),
-            nn.Conv2d(1, 32, 2, padding='same'),
-            nn.ReLU(),
-            nn.BatchNorm2d(32),
-            nn.UpsamplingBilinear2d(scale_factor=2),
-            nn.BatchNorm2d(32),
-            nn.Conv2d(32, 1, 3, padding='same'),
-            nn.ReLU()
-        )
-
-    def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
-        return x
+class Autoencoder(VAE):
+    def __init__(self, input_height):
+        super(Autoencoder, self).__init__(input_height)
+        self.encoder.conv1 = torch.nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.decoder.conv1 = torch.nn.Conv2d(64*self.decoder.expansion, 1, kernel_size=3, stride=1, padding=3, bias=False)
 
     def encode(self, images, USE_GPU):
         res = []

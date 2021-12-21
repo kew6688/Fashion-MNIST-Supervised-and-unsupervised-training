@@ -10,19 +10,19 @@ from mylibs.loss import autoencoder_loss
 from mylibs.train import autoencoder_train
 from mylibs.model import Autoencoder
 
-EPOCH = 30
+EPOCH = 1
 
 def encode(images, USE_GPU=False):
     print("Training Auto Encoder...")
     device = torch.device("cuda" if USE_GPU else "cpu")
-    model = Autoencoder().to(device)
-    optimizer = torch.optim.Adadelta(model.parameters(), lr=0.01)
-    train_dataloader = DataLoader(images, batch_size=32, shuffle=True, num_workers=4)
+    model = Autoencoder(input_height=28).to(device)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+    train_dataloader = DataLoader(images, batch_size=32, shuffle=True, num_workers=2)
     for epoch in range(1, EPOCH+1):
         loss = autoencoder_train(train_dataloader, model, autoencoder_loss, optimizer, USE_GPU)
         print("Epoch: {} Loss: {}".format(epoch, loss))
 
-    encode_dataloader = DataLoader(images, batch_size=1, shuffle=True, num_workers=4)
+    encode_dataloader = DataLoader(images, batch_size=1, shuffle=True, num_workers=2)
     return model.encode(encode_dataloader, USE_GPU)
     
 
