@@ -8,15 +8,26 @@ from pl_bolts.models.autoencoders import VAE
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.layers = torch.nn.Sequential(
+        self.encoder = torch.nn.Sequential(
             nn.Conv2d(1, 32, 3),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.Conv2d(32, 32, 3),
-            nn.BatchNorm2d(32),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(32, 64, 3),
+            nn.BatchNorm2d(64),
             nn.ReLU(),
+            nn.MaxPool2d(2),
             nn.Flatten(),
-            nn.Linear(18432, 10)
+        )
+        self.fc = torch.nn.Sequential(
+            nn.Linear(in_features=64*5*5, out_features=32, bias=False),
+            nn.Dropout(p=0.25, inplace=False),
+            nn.Linear(in_features=32, out_features=10, bias=False)
+        )
+        
+        self.layers = torch.nn.Sequential(
+            self.encoder,
+            self.fc
         )
 
     def forward(self, x):
@@ -29,19 +40,19 @@ class CustomFashionResNet(nn.Module):
         super(CustomFashionResNet, self).__init__()
 
         self.res18 = models.resnet18(pretrained=True, progress=False)
-        encoder = list(self.res18.children())[1:9]
+        encoder = list(self.res18.children())[1:6]
         input_layer = nn.Conv2d(color_scale, 64, kernel_size=7, stride=2, padding=3, bias=False)
         
         self.dropblock = nn.Sequential(
             nn.AdaptiveMaxPool2d(output_size=1),
             nn.Flatten(),
-            nn.BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
             nn.Dropout(p=0.25, inplace=False),
-            nn.Linear(in_features=512, out_features=256, bias=False),
+            nn.Linear(in_features=128, out_features=32, bias=False),
             nn.ReLU(),
-            nn.BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
             nn.Dropout(p=0.5, inplace=False),
-            nn.Linear(in_features=256, out_features=num_classes, bias=False)
+            nn.Linear(in_features=32, out_features=num_classes, bias=False)
         )
         
         self.seq_modules = nn.Sequential(
