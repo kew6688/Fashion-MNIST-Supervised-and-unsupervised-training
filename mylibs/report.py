@@ -14,24 +14,24 @@ def report_epoch_summary(eval_metrics):
 	val_f1 = [x["val"]["f1"] for x in eval_metrics]
 
 	plt.subplot(131)
-	plt.plot(range(1, epochs+1), train_loss, marker = 'o', label = "Training Loss")
-	plt.plot(range(1, epochs+1), val_loss, marker = 'o', label = "Validation Loss")
+	plt.plot(range(1, epochs+1), train_loss, label = "Training Loss")
+	plt.plot(range(1, epochs+1), val_loss, label = "Validation Loss")
 	plt.legend()
 	plt.title("Loss vs Epochs")
 	plt.xlabel("epochs")
 	plt.ylabel("Loss")
 
 	plt.subplot(132)
-	plt.plot(range(1, epochs+1), train_acc, marker = 'o', label = "Training Accuracy")
-	plt.plot(range(1, epochs+1), val_acc, marker = 'o', label = "Validation Accuracy")
+	plt.plot(range(1, epochs+1), train_acc, label = "Training Accuracy")
+	plt.plot(range(1, epochs+1), val_acc, label = "Validation Accuracy")
 	plt.legend()
 	plt.title("Accuracy vs Epochs")
 	plt.xlabel("epochs")
 	plt.ylabel("Accuracy")
 
 	plt.subplot(133)
-	plt.plot(range(1, epochs+1), train_f1, marker = 'o', label = "Training F1")
-	plt.plot(range(1, epochs+1), val_f1, marker = 'o', label = "Validation F1")
+	plt.plot(range(1, epochs+1), train_f1, label = "Training F1")
+	plt.plot(range(1, epochs+1), val_f1, label = "Validation F1")
 	plt.legend()
 	plt.title("F1 score vs Epochs")
 	plt.xlabel("epochs")
@@ -50,7 +50,7 @@ def report_summary(mode_metrics, mode_description):
 	plt.subplot(131)
 	for mode, vals in mode_loss:
 		epochs = len(vals)
-		plt.plot(range(1, epochs+1), vals, marker = 'o', label = mode_description[mode])
+		plt.plot(range(1, epochs+1), vals, label = mode_description[mode])
 	plt.legend()
 	plt.title("Validation Loss vs Epochs")
 	plt.xlabel("epochs")
@@ -59,7 +59,7 @@ def report_summary(mode_metrics, mode_description):
 	plt.subplot(132)
 	for mode, vals in mode_acc:
 		epochs = len(vals)
-		plt.plot(range(1, epochs+1), vals, marker = 'o', label = mode_description[mode])
+		plt.plot(range(1, epochs+1), vals, label = mode_description[mode])
 	plt.legend()
 	plt.title("Validation Accuracy vs Epochs")
 	plt.xlabel("epochs")
@@ -68,7 +68,7 @@ def report_summary(mode_metrics, mode_description):
 	plt.subplot(133)
 	for mode, vals in mode_f1:
 		epochs = len(vals)
-		plt.plot(range(1, epochs+1), vals, marker = 'o', label = mode_description[mode])
+		plt.plot(range(1, epochs+1), vals, label = mode_description[mode])
 	plt.legend()
 	plt.title("Validation F1 vs Epochs")
 	plt.xlabel("epochs")
