@@ -29,20 +29,29 @@ class CustomFashionResNet(nn.Module):
         super(CustomFashionResNet, self).__init__()
 
         self.res18 = models.resnet18(pretrained=True, progress=False)
-        encoder = list(self.res18.children())[1:6]
+        encoder = list(self.res18.children())[1:9]
         input_layer = nn.Conv2d(color_scale, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        pooling_layer = nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        self.output_layer = nn.Linear(in_features=128, out_features=num_classes, bias=True)
+        
+        self.dropblock = nn.Sequential(
+            nn.AdaptiveMaxPool2d(output_size=1),
+            nn.Flatten(),
+            nn.BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.Dropout(p=0.25, inplace=False),
+            nn.Linear(in_features=512, out_features=256, bias=False),
+            nn.ReLU(),
+            nn.BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.Dropout(p=0.5, inplace=False),
+            nn.Linear(in_features=256, out_features=num_classes, bias=False)
+        )
         
         self.seq_modules = nn.Sequential(
             input_layer,
             *encoder,
-            pooling_layer
+            self.dropblock
         )
         
     def forward(self, inp):
         output = self.seq_modules(inp)
-        output = self.output_layer(output.squeeze())
         return output
 
 class Autoencoder(VAE):
