@@ -5,14 +5,6 @@ import torchvision.models as models
 import numpy as np
 from pl_bolts.models.autoencoders import VAE
 
-class Reshape(nn.Module):
-    def __init__(self, *args):
-        super(Reshape, self).__init__()
-        self.shape = args
-
-    def forward(self, x):
-        return x.view(self.shape)
-
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -37,10 +29,10 @@ class CustomFashionResNet(nn.Module):
         super(CustomFashionResNet, self).__init__()
 
         self.res18 = models.resnet18(pretrained=True, progress=False)
-        encoder = list(self.res18.children())[1:8]
+        encoder = list(self.res18.children())[1:6]
         input_layer = nn.Conv2d(color_scale, 64, kernel_size=7, stride=2, padding=3, bias=False)
         pooling_layer = nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        self.output_layer = nn.Linear(in_features=512, out_features=num_classes, bias=True)
+        self.output_layer = nn.Linear(in_features=128, out_features=num_classes, bias=True)
         
         self.seq_modules = nn.Sequential(
             input_layer,
