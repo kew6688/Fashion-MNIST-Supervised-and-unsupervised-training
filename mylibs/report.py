@@ -92,6 +92,8 @@ def report_test_summary(mode_metrics, mode_description):
 	best_index = loss.index(min(loss))
 	barlist[best_index].set_color('r')
 	plt.xticks(range(len(modes)), modes)
+	plt.xlabel("modes")
+	plt.ylabel("Loss")
 
 	plt.subplot(132)
 	plt.title("Test Accuracy for each mode")
@@ -99,6 +101,8 @@ def report_test_summary(mode_metrics, mode_description):
 	best_index = acc.index(max(acc))
 	barlist[best_index].set_color('r')
 	plt.xticks(range(len(modes)), modes)
+	plt.xlabel("modes")
+	plt.ylabel("Accuracy")
 
 	plt.subplot(133)
 	plt.title("Test F1 for each mode")
@@ -106,6 +110,8 @@ def report_test_summary(mode_metrics, mode_description):
 	best_index = f1.index(max(f1))
 	barlist[best_index].set_color('r')
 	plt.xticks(range(len(modes)), modes)
+	plt.xlabel("modes")
+	plt.ylabel("F1 score")
 
 	plt.show()
 
