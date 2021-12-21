@@ -76,6 +76,7 @@ def report_summary(mode_metrics, mode_description):
 
 	plt.show()
 
+import matplotlib.pyplot as plt
 def report_test_summary(mode_metrics, mode_description):
 	plt.clf()
 	plt.figure(485, figsize=(16,8))
@@ -90,7 +91,9 @@ def report_test_summary(mode_metrics, mode_description):
 	plt.title("Test Loss for each mode")
 	barlist = plt.bar(range(len(modes)), loss)
 	best_index = loss.index(min(loss))
+	best_index2 = loss.index(min(loss[2:]))
 	barlist[best_index].set_color('r')
+	barlist[best_index2].set_color('g')
 	plt.xticks(range(len(modes)), modes)
 	plt.xlabel("modes")
 	plt.ylabel("Loss")
@@ -99,7 +102,9 @@ def report_test_summary(mode_metrics, mode_description):
 	plt.title("Test Accuracy for each mode")
 	barlist = plt.bar(range(len(modes)), acc)
 	best_index = acc.index(max(acc))
+	best_index2 = acc.index(max(acc[2:]))
 	barlist[best_index].set_color('r')
+	barlist[best_index2].set_color('g')
 	plt.xticks(range(len(modes)), modes)
 	plt.xlabel("modes")
 	plt.ylabel("Accuracy")
@@ -108,7 +113,9 @@ def report_test_summary(mode_metrics, mode_description):
 	plt.title("Test F1 for each mode")
 	barlist = plt.bar(range(len(modes)), f1)
 	best_index = f1.index(max(f1))
+	best_index2 = f1.index(max(f1[2:]))
 	barlist[best_index].set_color('r')
+	barlist[best_index2].set_color('g')
 	plt.xticks(range(len(modes)), modes)
 	plt.xlabel("modes")
 	plt.ylabel("F1 score")
@@ -118,3 +125,6 @@ def report_test_summary(mode_metrics, mode_description):
 	print("Mode Interpretations: ")
 	for mode in modes:
 		print(f"    {mode}: {mode_description[mode]}")
+	print("Color Interpretations: ")
+	print("    Red  : Best result over all runs")
+	print("    Green: Best result over all approachs (excluding baselines)")
