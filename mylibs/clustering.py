@@ -10,12 +10,12 @@ from mylibs.loss import autoencoder_loss
 from mylibs.train import autoencoder_train
 from mylibs.model import Autoencoder
 
-EPOCH = 15
+EPOCH = 10
 
 def encode(images, all_data, USE_GPU=False):
     print("Training Auto Encoder...")
     device = torch.device("cuda" if USE_GPU else "cpu")
-    model = Autoencoder(input_height=28).to(device)
+    model = Autoencoder().to(device)
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
     train_dataloader = DataLoader(all_data, batch_size=32, shuffle=True, num_workers=2)
     for epoch in range(1, EPOCH+1):

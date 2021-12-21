@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.functional as F
+import torch.nn.functional as F
 import torchvision.models as models
 import numpy as np
 from pl_bolts.models.autoencoders import VAE
@@ -53,11 +53,38 @@ class CustomFashionResNet(nn.Module):
         output = self.output_layer(output.squeeze())
         return output
 
-class Autoencoder(VAE):
-    def __init__(self, input_height):
-        super(Autoencoder, self).__init__(input_height)
-        self.encoder.conv1 = torch.nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=False)
-        self.decoder.conv1 = torch.nn.Conv2d(64*self.decoder.expansion, 1, kernel_size=3, stride=1, padding=3, bias=False)
+class Autoencoder(nn.Module):
+    def __init__(self):
+        super(Autoencoder, self).__init__()
+        
+        self.conv1 = nn.Conv2d(1, 32, 3, padding='same')
+        self.conv2 = nn.Conv2d(32, 32, 3, padding='same')
+        self.conv3 = nn.Conv2d(32, 1, 3, padding='same')
+        self.batch_norm = nn.BatchNorm2d(32)
+        self.relu = nn.ReLU()
+        self.flatten = nn.Flatten()
+        self.unflatten = nn.Unflatten(1, (32, 28, 28))
+        self.linear = nn.Linear(25088, 5)
+
+    def forward(self, x):
+        # encoder
+        x = self.conv1(x)
+        x = self.batch_norm(x)
+        x = self.relu(x)
+        x = self.conv2(x)
+        x = self.batch_norm(x)
+        x = self.relu(x)
+        x = self.flatten(x)
+        x = self.linear(x)
+        # decoder
+        x = torch.matmul(x, self.linear.weight)
+        x = self.unflatten(x)
+        x = F.conv_transpose2d(x, self.conv2.weight.transpose(0, 1), padding=(1, 1))
+        x = self.batch_norm(x)
+        x = self.relu(x)
+        x = self.conv3(x)
+        x = self.relu(x)
+        return x
 
     def encode(self, images, USE_GPU):
         res = []
@@ -65,6 +92,13 @@ class Autoencoder(VAE):
 
             if USE_GPU:
                 image = image.cuda()
-            e = self.encoder(image).detach().cpu().numpy()[0]
-            res.append(e)
+            x = self.conv1(image)
+            x = self.batch_norm(x)
+            x = self.relu(x)
+            x = self.conv2(x)
+            x = self.batch_norm(x)
+            x = self.relu(x)
+            x = self.flatten(x)
+            x = self.linear(x)
+            res.append(x.detach().cpu().numpy()[0])
         return np.array(res)

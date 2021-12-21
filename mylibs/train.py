@@ -75,7 +75,11 @@ def autoencoder_train(train_loader, net, loss_function, optimizer, USE_GPU):
         outputs = net(inputs)
         # --- eval metrics ---
         main_loss = loss_function(outputs, inputs)
-        main_loss.backward()
+        l1_penalty = sum([p.abs().sum() for p in net.parameters()])
+        l2_penalty = sum([(p**2).sum() for p in net.parameters()])
+        # print([main_loss, l1_penalty, l2_penalty])
+        regularized_loss = main_loss + 0.00001 * l1_penalty + 0.001 * l2_penalty
+        regularized_loss.backward()
         optimizer.step()
 
         loss += main_loss.item()
