@@ -69,41 +69,16 @@ class Autoencoder(nn.Module):
             nn.ConvTranspose2d(32, 1, 3, 1, 1)
         )
         
-        # self.conv1 = nn.Conv2d(1, 32, 3, padding='same')
-        # self.conv2 = nn.Conv2d(32, 32, 3, padding='same')
-        # self.conv3 = nn.Conv2d(32, 1, 3, padding='same')
-        # self.batch_norm = nn.BatchNorm2d(32)
-        # self.relu = nn.ReLU()
-        # self.flatten = nn.Flatten()
-        # self.unflatten = nn.Unflatten(1, (32, 28, 28))
-        # self.linear1 = nn.Linear(25088, 4)
-        # self.linear2 = nn.Linear(2, 25088)
-
     def forward(self, x):
         x = self.encoder(x)
         x = self.decoder(x)
         return x
 
     def encoder(self, x):
-        # x = self.conv1(x)
-        # x = self.batch_norm(x)
-        # x = self.relu(x)
-        # x = self.conv2(x)
-        # x = self.batch_norm(x)
-        # x = self.relu(x)
-        # x = self.flatten(x)
-        # x = self.linear1(x)
         x = self.e(x)
         return x
 
     def decoder(self, x):
-        # x = self.linear2(x)
-        # x = self.unflatten(x)
-        # x = F.conv_transpose2d(x, self.conv2.weight.transpose(0, 1), padding=(1, 1))
-        # x = self.batch_norm(x)
-        # x = self.relu(x)
-        # x = self.conv3(x)
-        # x = self.relu(x)
         x = self.d(x)
         x = F.pad(x, [1, 0, 1, 0])
         return x

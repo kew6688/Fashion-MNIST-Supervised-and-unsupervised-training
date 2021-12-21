@@ -8,8 +8,6 @@ def log_normal_pdf(sample, mean, logvar, raxis=1):
     log2pi = torch.log(torch.tensor(2.0 * torch.as_tensor(np.pi)))
     return torch.sum(-0.5 * ((sample - mean) ** 2.0 * torch.exp(torch.tensor(-logvar)) + logvar + log2pi), dim=raxis)
 
-
-
 def compute_loss(model, x, USE_GPU):
     e = model.encoder(x)
     mean, logvar = e[:, :2], e[:, 2:]
