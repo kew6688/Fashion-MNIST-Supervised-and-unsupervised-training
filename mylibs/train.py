@@ -1,5 +1,4 @@
 import torch
-import numpy as np
 from torch._C import dtype
 from sklearn.metrics import f1_score
 from mylibs.eval import validate
@@ -72,13 +71,15 @@ def autoencoder_train(train_loader, net, loss_function, optimizer, USE_GPU):
             inputs = inputs[0]
         
         optimizer.zero_grad()
-        outputs = net(inputs)
+        # outputs = net(inputs)
         # --- eval metrics ---
-        main_loss = loss_function(outputs, inputs)
+        # main_loss = loss_function(outputs, inputs)
         l1_penalty = sum([p.abs().sum() for p in net.parameters()])
         l2_penalty = sum([(p**2).sum() for p in net.parameters()])
+        main_loss = loss_function(inputs, net)
+        # print(main_loss)
         # print([main_loss, l1_penalty, l2_penalty])
-        regularized_loss = main_loss + 0.00001 * l1_penalty + 0.001 * l2_penalty
+        regularized_loss = main_loss + 0.01 * l1_penalty + 0.1 * l2_penalty
         regularized_loss.backward()
         optimizer.step()
 
