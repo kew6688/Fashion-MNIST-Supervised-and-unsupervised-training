@@ -9,10 +9,10 @@ def log_normal_pdf(sample, mean, logvar, raxis=1):
 
 
 
-def compute_loss(model, x):
+def compute_loss(model, x, USE_GPU):
     e = model.encoder(x)
     mean, logvar = e[:, :2], e[:, 2:]
-    z = model.reparameterize(mean, logvar)
+    z = model.reparameterize(mean, logvar, USE_GPU)
     x_logit = model.decoder(z)
     cross_ent = F.binary_cross_entropy_with_logits(x_logit, x, reduction='none')
     logpx_z = -torch.sum(cross_ent, dim=[1, 2, 3])
@@ -24,7 +24,7 @@ class VAELoss(nn.Module):
     def __init__(self):
         super(VAELoss, self).__init__()
  
-    def forward(self, inputs, model):
-        return compute_loss(model, inputs)
+    def forward(self, inputs, model, USE_GPU):
+        return compute_loss(model, inputs, USE_GPU)
 
 autoencoder_loss = VAELoss()

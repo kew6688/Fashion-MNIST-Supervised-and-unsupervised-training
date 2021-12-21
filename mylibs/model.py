@@ -116,8 +116,13 @@ class Autoencoder(nn.Module):
         x = F.pad(x, [1, 0, 1, 0])
         return x
 
-    def reparameterize(self, mean, logvar):
-        eps = torch.normal(torch.zeros(mean.size()), torch.ones(mean.size()))
+    def reparameterize(self, mean, logvar, USE_GPU):
+        if USE_GPU:
+            mean = mean.cuda()
+            logvar = logvar.cuda()
+            eps = torch.normal(torch.zeros(mean.size()).cuda(), torch.ones(mean.size()).cuda())
+        else: 
+            eps = torch.normal(torch.zeros(mean.size()), torch.ones(mean.size()))
         return eps * torch.exp(logvar * 0.5) + mean
 
 
@@ -129,6 +134,6 @@ class Autoencoder(nn.Module):
                 image = image.cuda()
             x = self.encoder(image)
             mean, logvar = x[:, :2], x[:, 2:]
-            x = self.reparameterize(mean, logvar)
+            x = self.reparameterize(mean, logvar, USE_GPU)
             res.append(x.detach().cpu().numpy()[0])
         return np.array(res)
