@@ -5,14 +5,6 @@ import torchvision.models as models
 import numpy as np
 from pl_bolts.models.autoencoders import VAE
 
-class Reshape(nn.Module):
-    def __init__(self, *args):
-        super(Reshape, self).__init__()
-        self.shape = args
-
-    def forward(self, x):
-        return x.view(self.shape)
-
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
