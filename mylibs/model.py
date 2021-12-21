@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.functional as F
+import torch.nn.functional as F
 import torchvision.models as models
 import numpy as np
 from pl_bolts.models.autoencoders import VAE
@@ -45,11 +45,53 @@ class CustomFashionResNet(nn.Module):
         output = self.output_layer(output.squeeze())
         return output
 
-class Autoencoder(VAE):
-    def __init__(self, input_height):
-        super(Autoencoder, self).__init__(input_height)
-        self.encoder.conv1 = torch.nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=False)
-        self.decoder.conv1 = torch.nn.Conv2d(64*self.decoder.expansion, 1, kernel_size=3, stride=1, padding=3, bias=False)
+class Autoencoder(nn.Module):
+    def __init__(self):
+        super(Autoencoder, self).__init__()
+
+        self.e = nn.Sequential(
+            nn.Conv2d(1, 32, 3, 2),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, 3, 2),
+            nn.ReLU(),
+            nn.Flatten(),
+            nn.Linear(2304, 4)
+        )
+
+        self.d = nn.Sequential(
+            nn.Linear(2, 1152),
+            nn.ReLU(),
+            nn.Unflatten(1, (32, 6, 6)),
+            nn.ConvTranspose2d(32, 64, 3, 2, 0),
+            nn.ReLU(),
+            nn.ConvTranspose2d(64, 32, 3, 2, 0),
+            nn.ReLU(),
+            nn.ConvTranspose2d(32, 1, 3, 1, 1)
+        )
+        
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
+
+    def encoder(self, x):
+        x = self.e(x)
+        return x
+
+    def decoder(self, x):
+        x = self.d(x)
+        x = F.pad(x, [1, 0, 1, 0])
+        return x
+
+    def reparameterize(self, mean, logvar, USE_GPU):
+        if USE_GPU:
+            mean = mean.cuda()
+            logvar = logvar.cuda()
+            eps = torch.normal(torch.zeros(mean.size()).cuda(), torch.ones(mean.size()).cuda())
+        else: 
+            eps = torch.normal(torch.zeros(mean.size()), torch.ones(mean.size()))
+        return eps * torch.exp(logvar * 0.5) + mean
+
 
     def encode(self, images, USE_GPU):
         res = []
@@ -57,6 +99,8 @@ class Autoencoder(VAE):
 
             if USE_GPU:
                 image = image.cuda()
-            e = self.encoder(image).detach().cpu().numpy()[0]
-            res.append(e)
+            x = self.encoder(image)
+            mean, logvar = x[:, :2], x[:, 2:]
+            x = self.reparameterize(mean, logvar, USE_GPU)
+            res.append(x.detach().cpu().numpy()[0])
         return np.array(res)

@@ -12,12 +12,12 @@ from mylibs.model import Autoencoder
 
 EPOCH = 15
 
-def encode(images, USE_GPU=False):
+def encode(images, all_data, USE_GPU=False):
     print("Training Auto Encoder...")
     device = torch.device("cuda" if USE_GPU else "cpu")
-    model = Autoencoder(input_height=28).to(device)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-    train_dataloader = DataLoader(images, batch_size=32, shuffle=True, num_workers=2)
+    model = Autoencoder().to(device)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+    train_dataloader = DataLoader(all_data, batch_size=32, shuffle=True, num_workers=2)
     for epoch in range(1, EPOCH+1):
         loss = autoencoder_train(train_dataloader, model, autoencoder_loss, optimizer, USE_GPU)
         print("Epoch: {} Loss: {}".format(epoch, loss))
@@ -33,7 +33,7 @@ def encode(images, USE_GPU=False):
 # 3 - Gaussian Mixture
 # 4 - Gaussian Mixture with PCA
 # 5 - Gaussian Mixture with Auto Encoder
-def label_data(unlabeled_data, labels, mode=0, USE_GPU=False):
+def label_data(unlabeled_data, labels, all_data, mode=0, USE_GPU=False):
     print("Labeling unlabeled data...")
     num_classes = len(labels)
     images = np.array([x[0].numpy() for x in unlabeled_data])
@@ -47,7 +47,7 @@ def label_data(unlabeled_data, labels, mode=0, USE_GPU=False):
         images = pca.fit_transform(images.reshape(len(unlabeled_data), -1))
     elif mode == 2 or mode == 5:
         # Auto Encoder to reduce dimensions of images
-        images = encode(images, USE_GPU)
+        images = encode(images, all_data, USE_GPU)
 
     if mode == 0 or mode == 1 or mode == 2:
         # kmeans clustering the images
